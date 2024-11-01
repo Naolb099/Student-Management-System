@@ -14,6 +14,8 @@ services:
       context: .
     ports:
       - "9000:80"
+    networks:
+      - app-network
     
   # db service
   db:
@@ -23,11 +25,16 @@ services:
     environment:
       MYSQL_DATABASE: my_database
       MYSQL_ROOT_PASSWORD: str0n9pwd:)
+    ports:
+      - "3306:3306"
+
     volumes:
       - db-data:/var/lib/mysql
+    networks:
+      - app-network
 
   phpmyadmin:
-    image: phpmyadmin:5.2 # Specify a compatible phpMyAdmin version
+    image: phpmyadmin:5.2 
     platform: linux/arm64
     restart: always
     ports:
@@ -37,6 +44,8 @@ services:
       PMA_USER: root 
       PMA_PASSWORD: str0n9pwd:)
       PMA_PORT: 3306
+    networks:
+      - app-network
 
 networks:
   app-network:
