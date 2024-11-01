@@ -9,14 +9,25 @@
 # https://github.com/docker/awesome-compose
 
 services:
+  # server:
+  #   build:
+  #     context: .
+  #   ports:
+  #     - "9000:80"
+  #   networks:
+  #     - app-network
   server:
-    build:
+    build: 
       context: .
+    container_name: php-server
     ports:
-      - "9000:80"
+      - "8000:80"
+    volumes:
+      - ./:/var/www/html
     networks:
-      - app-network
-    
+    - app-network
+
+
   # db service
   db:
     image: mysql:8.0

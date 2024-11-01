@@ -14,6 +14,8 @@
 # If reproducability is important, consider using a specific digest SHA, like
 # php@sha256:99cede493dfd88720b610eb8077c8688d3cca50003d76d1d539b0efc8cca72b4.
 FROM php:8.3-apache
+RUN docker-php-ext-install mysqli && docker-php-ext-enable mysqli
+RUN apt-get update && docker-php-ext-install pdo_mysql
 
 # Copy app files from the app directory.
 COPY . /var/www/html
