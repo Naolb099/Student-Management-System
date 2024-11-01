@@ -1,3 +1,33 @@
+<?php
+require 'includes/db_connection.php';
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $username = $_POST['username'];
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+    $role = $_POST['role'];
+
+
+    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+    try {
+        $sql = "INSERT INTO users (username, email, password, role) VALUES (:username, :email, :password, :role)";
+        $stmt = $conn->prepare($sql);
+
+
+        $stmt->bindParam(':username', $username);
+        $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':password', $hashedPassword);
+        $stmt->bindParam(':role', $role);
+
+
+        $stmt->execute();
+        echo "<div class='alert alert-success'>User registered successfully!</div>";
+    } catch (PDOException $e) {
+        echo "<div class='alert alert-danger'>Error: " . $e->getMessage() . "</div>";
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
