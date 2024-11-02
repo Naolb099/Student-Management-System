@@ -1,3 +1,35 @@
+<?php
+session_start();
+require 'includes/db_connection.php';
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+
+    try {
+
+        $sql = "SELECT * FROM users WHERE username = :username";
+        $stmt = $conn->prepare($sql);
+        $stmt->bindParam(':username', $username);
+        $stmt->execute();
+
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($user && password_verify($password, $user['password'])) {
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['role'] = $user['role'];
+            header("Location: dashboard.php");
+            exit();
+        } else {
+            echo "<div class='alert alert-danger'>Invalid username or password!</div>";
+        }
+    } catch (PDOException $e) {
+        echo "<div class='alert alert-danger'>Error: " . $e->getMessage() . "</div>";
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
