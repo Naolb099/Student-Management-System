@@ -2,6 +2,7 @@
 session_start();
 require 'includes/db_connection.php';
 
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'];
     $password = $_POST['password'];
@@ -19,7 +20,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
             $_SESSION['role'] = $user['role'];
-            header("Location: dashboard.php");
+
+            if ($user['role'] === 'Administrator') {
+                header("Location: admin_records.php");
+            } elseif ($user['role'] === 'Coordinator') {
+                header("Location: coordinator_view.php");
+            } else {
+                header("Location: dashboard.php");
+            }
             exit();
         } else {
             echo "<div class='alert alert-danger'>Invalid username or password!</div>";
