@@ -28,7 +28,7 @@ services:
     restart: always
     environment:
       MYSQL_DATABASE: my_database
-      MYSQL_ROOT_PASSWORD: str0n9pwd:)
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db-password
     ports:
       - "3306:3306"
 
@@ -36,6 +36,8 @@ services:
       - db-data:/var/lib/mysql
     networks:
       - app-network
+    secrets:
+      - db-password
 
   phpmyadmin:
     image: phpmyadmin:5.2 
@@ -46,17 +48,23 @@ services:
     environment:
       PMA_HOST: db
       PMA_USER: root 
-      PMA_PASSWORD: str0n9pwd:)
+      PMA_PASSWORD_FILE: /run/secrets/db-password
       PMA_PORT: 3306
     networks:
       - app-network
-
+    secrets:
+      - db-password
+    
 networks:
   app-network:
     driver: bridge
 
 volumes:
   db-data:
+
+secrets:
+  db-password:
+    file: .env
 
 
 
