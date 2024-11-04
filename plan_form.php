@@ -1,3 +1,27 @@
+<?php
+require 'includes/db_connection.php';
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $studentName = $_POST['student_name'];
+    $accommodations = $_POST['accommodations'];
+    $planDuration = $_POST['plan_duration'];
+
+    try {
+        $sql = "INSERT INTO plans (student_name, accommodations, plan_duration) 
+                VALUES (:student_name, :accommodations, :plan_duration)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bindParam(':student_name', $studentName);
+        $stmt->bindParam(':accommodations', $accommodations);
+        $stmt->bindParam(':plan_duration', $planDuration);
+        $stmt->execute();
+
+        echo "<div class='alert alert-success'>504 Plan saved successfully!</div>";
+    } catch (PDOException $e) {
+        echo "<div class='alert alert-danger'>Error: " . $e->getMessage() . "</div>";
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 

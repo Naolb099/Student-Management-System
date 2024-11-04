@@ -1,3 +1,52 @@
+<?php
+session_start();
+require 'includes/db_connection.php';
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $studentName = $_POST['student_name'];
+    $dob = $_POST['dob'];
+    $disability = $_POST['disability'];
+    $eligibility = $_POST['eligibility'];
+    $coordinatorId = $_SESSION['user_id'];
+    $filePath = '';
+
+    if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] == 0) {
+        $targetDir = "uploads/";
+        $fileName = basename($_FILES["attachment"]["name"]);
+        $targetFilePath = $targetDir . uniqid() . "_" . $fileName;
+
+        $fileType = pathinfo($targetFilePath, PATHINFO_EXTENSION);
+        if ($fileType == "pdf") {
+            if (move_uploaded_file($_FILES["attachment"]["tmp_name"], $targetFilePath)) {
+                $filePath = $targetFilePath;
+            } else {
+                echo "<div class='alert alert-danger'>File upload failed.</div>";
+                exit();
+            }
+        } else {
+            echo "<div class='alert alert-danger'>Only PDF files are allowed.</div>";
+            exit();
+        }
+    }
+
+    try {
+        $sql = "INSERT INTO eligibility (student_name, dob, disability, eligibility_status, coordinator_id, attachment) 
+                VALUES (:student_name, :dob, :disability, :eligibility, :coordinator_id, :attachment)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bindParam(':student_name', $studentName);
+        $stmt->bindParam(':dob', $dob);
+        $stmt->bindParam(':disability', $disability);
+        $stmt->bindParam(':eligibility', $eligibility);
+        $stmt->bindParam(':coordinator_id', $coordinatorId);
+        $stmt->bindParam(':attachment', $filePath);
+        $stmt->execute();
+
+        echo "<div class='alert alert-success'>Eligibility record saved successfully!</div>";
+    } catch (PDOException $e) {
+        echo "<div class='alert alert-danger'>Error: " . $e->getMessage() . "</div>";
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -12,7 +61,7 @@
 <body>
     <div class="container mt-5">
         <h2>Eligibility Determination</h2>
-        <form action="save_eligibility.php" method="post">
+        <form action="eligibility_form.php" method="post" enctype="multipart/form-data">
             <div class="mb-3">
                 <label for="student_name" class="form-label">Student Name</label>
                 <input type="text" class="form-control" id="student_name" name="student_name" required>
@@ -32,6 +81,10 @@
                     <option value="eligible">Eligible</option>
                     <option value="not_eligible">Not Eligible</option>
                 </select>
+            </div>
+            <div class="mb-3">
+                <label for="attachment" class="form-label">Upload Document</label>
+                <input type="file" class="form-control" id="attachment" name="attachment" accept="application/pdf">
             </div>
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>
