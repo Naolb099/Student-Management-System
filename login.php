@@ -62,6 +62,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <input type="password" class="form-control" name="password" required>
             </div>
             <button type="submit" class="btn btn-primary">Login</button>
+            <div class="mt-3">
+                Didn't have account?
+                <a href="register.php">register</a>
+            </div>
+
         </form>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"

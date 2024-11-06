@@ -31,7 +31,12 @@ try {
 
 <body>
     <div class="container mt-5">
-        <h2>Welcome, <?= htmlspecialchars($_SESSION['username']); ?> (Coordinator)</h2>
+        <div class="d-flex justify-content-between align-items-center">
+            <h2>Welcome, <?= htmlspecialchars($_SESSION['username']); ?> (Coordinator)</h2>
+            <a href="logout.php" class="btn btn-danger ms-auto">Logout</a>
+        </div>
+
+
         <p class="text-muted">Manage your students' eligibility forms and 504 plans.</p>
 
 

@@ -22,7 +22,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 
         $stmt->execute();
-        echo "<div class='alert alert-success'>User registered successfully!</div>";
+        header("Location: login.php");
+        exit();
     } catch (PDOException $e) {
         echo "<div class='alert alert-danger'>Error: " . $e->getMessage() . "</div>";
     }
