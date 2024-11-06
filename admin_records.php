@@ -1,15 +1,34 @@
 <?php
-session_start();
-require 'includes/db_connection.php';
 require 'includes/access_control.php';
+require 'includes/db_connection.php';
 
-checkAccess('Coordinator');
+checkAccess('Administrator');
 
-$coordinatorId = $_SESSION['user_id'];
+
 try {
-    $sql = "SELECT * FROM eligibility WHERE coordinator_id = :coordinatorId";
+    $summarySql = "SELECT COUNT(*) AS active_plans FROM eligibility WHERE eligibility_status = 'eligible'";
+    $summaryStmt = $conn->query($summarySql);
+    $summaryData = $summaryStmt->fetch(PDO::FETCH_ASSOC);
+    $activePlans = $summaryData['active_plans'];
+} catch (PDOException $e) {
+    echo "<div class='alert alert-danger'>Error: " . $e->getMessage() . "</div>";
+}
+
+
+$searchTerm = isset($_GET['search']) ? $_GET['search'] : '';
+
+try {
+    $sql = "SELECT * FROM eligibility";
+    if ($searchTerm) {
+        $sql .= " WHERE student_name LIKE :searchTerm";
+    }
+
     $stmt = $conn->prepare($sql);
-    $stmt->bindParam(':coordinatorId', $coordinatorId);
+
+    if ($searchTerm) {
+        $stmt->bindValue(':searchTerm', '%' . $searchTerm . '%');
+    }
+
     $stmt->execute();
     $eligibilityForms = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
@@ -23,27 +42,30 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coordinator Dashboard</title>
+    <title>Administrator Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
     <div class="container mt-5">
         <div class="d-flex justify-content-between align-items-center">
-            <h2>Welcome, <?= htmlspecialchars($_SESSION['username']); ?> (Coordinator)</h2>
+            <h2>Welcome, <?= htmlspecialchars($_SESSION['username']); ?> (Admin)</h2>
             <a href="logout.php" class="btn btn-danger ms-auto">Logout</a>
         </div>
 
 
-        <p class="text-muted">Manage your students' eligibility forms and 504 plans.</p>
+        <a href="export_csv.php" class="btn btn-primary mb-3">Export as CSV</a>
+        <div class="alert alert-info">Number of active 504 plans: <?= $activePlans; ?></div>
 
 
-        <div class="mb-4">
-            <a href="eligibility_form.php" class="btn btn-primary">New Eligibility Form</a>
-            <a href="plan_form.php" class="btn btn-secondary">New 504 Plan Form</a>
-        </div>
+        <form method="get" action="admin_records.php" class="mb-3">
+            <input type="text" name="search" class="form-control" placeholder="Search by student name"
+                value="<?= htmlspecialchars($searchTerm); ?>">
+            <button type="submit" class="btn btn-primary mt-2">Search</button>
+        </form>
 
-        <h3>Your Submitted Forms</h3>
+
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -52,7 +74,7 @@ try {
                     <th>Disability</th>
                     <th>Eligibility Status</th>
                     <th>Date Created</th>
-                    <th>Actions</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -63,10 +85,8 @@ try {
                         <td><?= htmlspecialchars($form['disability']); ?></td>
                         <td><?= htmlspecialchars($form['eligibility_status']); ?></td>
                         <td><?= htmlspecialchars($form['created_at']); ?></td>
-                        <td>
-                            <a href="view_form.php?id=<?= $form['id']; ?>" class="btn btn-sm btn-info">View</a>
-                            <a href="edit_form.php?id=<?= $form['id']; ?>" class="btn btn-sm btn-warning">Edit</a>
-                        </td>
+                        <td><a href="generate_pdf.php?id=<?= $form['id']; ?>" class="btn btn-sm btn-primary">Download
+                                PDF</a></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
