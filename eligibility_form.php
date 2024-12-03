@@ -60,7 +60,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <body>
     <div class="container mt-5">
-        <h2>Eligibility Determination</h2>
+        <div class="d-flex justify-content-between align-items-center">
+            <h2>Eligibility Determination</h2>
+            <a href="coordinator_view.php">My Dashboard</a>
+        </div>
         <form action="eligibility_form.php" method="post" enctype="multipart/form-data">
             <div class="mb-3">
                 <label for="student_name" class="form-label">Student Name</label>
